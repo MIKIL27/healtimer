@@ -104,8 +104,8 @@ CATEGORIES = {
     },
 }
 
-# The per-injury activity_overrides field is optional. An override replaces
-# the category's four-stage statuses for only the named activities.
+# An optional activity_overrides field on an injury replaces the category
+# statuses for the named activity across its four stages.
 INJURIES = {
     "ankle-sprain": {
         "name": "Ankle sprain",
@@ -140,7 +140,6 @@ INJURIES = {
             "severe": {"min_days": 42, "max_days": 84},
         },
     },
-
     "finger-fracture": {
         "name": "Finger fracture",
         "category_id": "fractures",
@@ -161,7 +160,6 @@ INJURIES = {
             "severe": {"min_days": 42, "max_days": 70},
         },
     },
-
     "minor-cut": {
         "name": "Minor cut",
         "category_id": "cuts-wounds",
@@ -182,7 +180,6 @@ INJURIES = {
             "severe": {"min_days": 21, "max_days": 42},
         },
     },
-
     "thigh-contusion": {
         "name": "Thigh bruise",
         "category_id": "bruises-impact",
@@ -213,7 +210,6 @@ INJURIES = {
             "severe": {"min_days": 21, "max_days": 42},
         },
     },
-
     "superficial-burn": {
         "name": "Superficial burn",
         "category_id": "burns",
