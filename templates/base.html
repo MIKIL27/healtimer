@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>{% block title %}HealTimer{% endblock %}</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #f5f6f8;
+      --surface: #ffffff;
+      --surface-muted: #eef0f4;
+      --text: #18202b;
+      --muted: #697386;
+      --line: rgba(28, 39, 55, .10);
+      --shadow: 0 8px 28px rgba(31, 43, 60, .08);
+      --nav-shadow: 0 -5px 24px rgba(31, 43, 60, .08);
+      --allowed: #17834e;
+      --allowed-bg: #e3f5eb;
+      --limited: #a96300;
+      --limited-bg: #fff1d7;
+      --prohibited: #bd3434;
+      --prohibited-bg: #fde8e8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .stage-1 { --accent: #d84a4a; --accent-soft: #fde9e7; }
+    .stage-2 { --accent: #e17a32; --accent-soft: #fff0e3; }
+    .stage-3 { --accent: #bd941c; --accent-soft: #fff7d9; }
+    .stage-4 { --accent: #24935e; --accent-soft: #e4f5eb; }
+
+    .app-header {
+      padding: calc(env(safe-area-inset-top) + 12px) 20px 16px;
+      background: var(--surface);
+      border-bottom: 3px solid var(--accent, #e17a32);
+    }
+
+    .header-inner, main, .bottom-nav-inner {
+      width: min(100%, 620px);
+      margin: 0 auto;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      text-decoration: none;
+    }
+
+    .demo-panel {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .demo-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 2px;
+    }
+
+    .demo-panel button {
+      min-height: 36px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .demo-panel button:active, .button:active, .category-link:active {
+      transform: scale(.98);
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    main {
+      padding: 26px 18px calc(110px + env(safe-area-inset-bottom));
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: clamp(30px, 8vw, 38px);
+      letter-spacing: -.045em;
+      line-height: 1.08;
+    }
+
+    h2 {
+      font-size: 21px;
+      letter-spacing: -.025em;
+    }
+
+    h3 { font-size: 17px; }
+
+    p { line-height: 1.5; }
+
+    .subtitle, .muted, .eyebrow { color: var(--muted); }
+    .subtitle { margin-bottom: 24px; }
+    .eyebrow {
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      padding: 18px;
+      margin-bottom: 14px;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+
+    .injury-card {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      border-left: 4px solid var(--accent);
+    }
+
+    .injury-card:active { transform: scale(.99); }
+
+    .card-heading, .row-between {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-heading h2 { margin-bottom: 5px; }
+    .severity {
+      flex: 0 0 auto;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .stage-pill {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .progress-wrap { margin-top: 16px; }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .progress-track {
+      position: relative;
+      height: 10px;
+      overflow: visible;
+      border-radius: 99px;
+      background: var(--surface-muted);
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width .2s ease;
+    }
+
+    .range-marker {
+      position: absolute;
+      z-index: 1;
+      top: -4px;
+      width: 2px;
+      height: 18px;
+      background: var(--text);
+      opacity: .68;
+    }
+
+    .range-legend {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 17px;
+      border: 0;
+      border-radius: 14px;
+      font: inherit;
+      font-weight: 750;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .16s ease, opacity .16s ease;
+    }
+
+    .button-primary {
+      background: var(--accent, #e17a32);
+      color: #fff;
+    }
+
+    .button-secondary {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .button-danger {
+      background: var(--prohibited-bg);
+      color: var(--prohibited);
+    }
+
+    .full-width { width: 100%; }
+
+    .category-list, .injury-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .category-link {
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 750;
+      transition: transform .16s ease;
+    }
+
+    .category-link span:last-child {
+      color: var(--muted);
+      font-size: 22px;
+    }
+
+    .list-link {
+      display: block;
+      padding: 17px;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .list-link h2 { margin-bottom: 6px; }
+    .list-link p { margin-bottom: 0; color: var(--muted); }
+
+    .empty-state {
+      padding: 30px 20px;
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .empty-state .button { margin-top: 10px; }
+
+    .notice {
+      margin-bottom: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--accent-soft);
+    }
+
+    .notice p { margin-bottom: 12px; }
+    .notice h2 { margin-bottom: 8px; font-size: 18px; }
+
+    .flash-list { margin-bottom: 16px; }
+    .flash {
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .flash-error { border-left: 4px solid var(--prohibited); }
+    .flash-success { border-left: 4px solid var(--allowed); }
+
+    .severity-options {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .severity-option {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .severity-option:has(input:checked) {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      accent-color: var(--accent, #e17a32);
+    }
+
+    input, button { font-size: 16px; }
+
+    .estimate-box {
+      padding: 18px;
+      margin: 18px 0;
+      border-radius: 16px;
+      background: var(--accent-soft);
+    }
+
+    .estimate-number {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 850;
+      letter-spacing: -.04em;
+    }
+
+    .estimate-box p:last-child { margin-bottom: 0; }
+
+    .timeline {
+      position: relative;
+      height: 18px;
+      display: flex;
+      margin: 28px 0 12px;
+      border-radius: 999px;
+      background: var(--surface-muted);
+    }
+
+    .timeline-segment:first-child { border-radius: 999px 0 0 999px; }
+    .timeline-segment:last-of-type { border-radius: 0 999px 999px 0; }
+    .timeline-segment:nth-child(1) { background: #d84a4a; }
+    .timeline-segment:nth-child(2) { background: #e17a32; }
+    .timeline-segment:nth-child(3) { background: #d6ad2c; }
+    .timeline-segment:nth-child(4) { background: #24935e; }
+
+    .today-marker {
+      position: absolute;
+      top: -7px;
+      width: 4px;
+      height: 32px;
+      border: 1px solid var(--surface);
+      border-radius: 4px;
+      background: var(--text);
+      transform: translateX(-50%);
+    }
+
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .activity-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .activity-table th, .activity-table td {
+      padding: 13px 4px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .activity-table th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .activity-table td:last-child, .activity-table th:last-child {
+      text-align: right;
+    }
+
+    .status-chip {
+      display: inline-block;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status-allowed { color: var(--allowed); background: var(--allowed-bg); }
+    .status-limited { color: var(--limited); background: var(--limited-bg); }
+    .status-prohibited { color: var(--prohibited); background: var(--prohibited-bg); }
+
+    .passed-notice {
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--limited-bg);
+      color: var(--limited);
+      font-weight: 650;
+    }
+
+    .disclaimer-footer {
+      padding: 18px 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 10;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+      background: var(--surface);
+      box-shadow: var(--nav-shadow);
+    }
+
+    .bottom-nav-inner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      min-height: 52px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border-radius: 13px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft, #fff0e3);
+      color: var(--accent, #e17a32);
+    }
+
+    .nav-symbol { font-size: 18px; line-height: 1; }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #101216;
+        --surface: #1c2027;
+        --surface-muted: #292e37;
+        --text: #f3f5f8;
+        --muted: #a4adbc;
+        --line: rgba(235, 240, 250, .11);
+        --shadow: 0 8px 28px rgba(0, 0, 0, .22);
+        --nav-shadow: 0 -5px 24px rgba(0, 0, 0, .28);
+        --allowed: #62ce91;
+        --allowed-bg: #183c2b;
+        --limited: #f1b64d;
+        --limited-bg: #493719;
+        --prohibited: #ff8585;
+        --prohibited-bg: #482727;
+      }
+
+      .stage-1 { --accent: #f07171; --accent-soft: #482727; }
+      .stage-2 { --accent: #f09a5b; --accent-soft: #49301f; }
+      .stage-3 { --accent: #e4c458; --accent-soft: #453b1d; }
+      .stage-4 { --accent: #5fc68d; --accent-soft: #183c2b; }
+    }
+
+    @media (max-width: 380px) {
+      .app-header { padding-right: 14px; padding-left: 14px; }
+      .demo-label { display: none; }
+      .demo-panel button { padding-right: 7px; padding-left: 7px; }
+      main { padding-right: 14px; padding-left: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header {{ stage_class|default('stage-2') }}">
+    <div class="header-inner">
+      <div class="topline">
+        <a class="brand" href="{{ url_for('home') }}">HealTimer</a>
+        <form class="demo-panel" method="post" action="{{ url_for('set_demo_offset') }}">
+          <span class="demo-label">Demo</span>
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" name="action" value="plus_one" aria-label="Advance demo by one day">+1 day</button>
+          <button type="submit" name="action" value="plus_seven" aria-label="Advance demo by seven days">+7 days</button>
+          <button type="submit" name="action" value="plus_thirty" aria-label="Advance demo by thirty days">+30</button>
+          <button type="submit" name="action" value="reset">Reset</button>
+        </form>
+      </div>
+
+      {% set demo_offset = session.get('demo_offset_days', 0)|int %}
+      {% if demo_offset != 0 %}
+        <div class="demo-badge" role="status">Demo mode: +{{ demo_offset }} days</div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="{{ stage_class|default('stage-2') }}">
+    {% if not session.get('disclaimer_accepted', False) %}
+      <section class="notice" aria-label="Important notice">
+        <h2>A note before you begin</h2>
+        <p>Healing times and activity suggestions are estimates only. This app is not medical advice and cannot replace a clinician’s guidance.</p>
+        <form method="post" action="{{ url_for('accept_disclaimer') }}">
+          <input type="hidden" name="next" value="{{ request.path }}"> **…**
+
+_This response is too long to display in full._
