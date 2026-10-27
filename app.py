@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from flask import (
     Flask,
@@ -16,7 +16,13 @@ from flask import (
 
 from data import ACTIVITIES, CATEGORIES, INJURIES, STAGES
 
-app = Flask(__name__)
+
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(APP_DIR, "templates"),
+)
 
 # Set SECRET_KEY in the deployment environment before publishing.
 # This placeholder is for local testing only; change it before deployment.
@@ -41,6 +47,7 @@ def get_today():
         offset = int(session.get("demo_offset_days", 0))
     except (TypeError, ValueError):
         offset = 0
+
     return date.today() + timedelta(days=offset)
 
 
@@ -68,6 +75,7 @@ def remaining_range(elapsed_days, min_days, max_days):
     """Return the estimated remaining range and whether the window has passed."""
     min_left = max(0, min_days - elapsed_days)
     max_left = max(0, max_days - elapsed_days)
+
     return {
         "min_days": min_left,
         "max_days": max_left,
@@ -77,7 +85,7 @@ def remaining_range(elapsed_days, min_days, max_days):
 
 
 def parse_start_date(value):
-    """Parse a stored ISO date; malformed session data is treated as invalid."""
+    """Parse a stored ISO date."""
     try:
         return date.fromisoformat(value)
     except (TypeError, ValueError):
@@ -85,12 +93,15 @@ def parse_start_date(value):
 
 
 def get_entry(entry_id):
-    """Look up one active injury entry from the signed-cookie session."""
+    """Find an active injury entry in the signed-cookie session."""
     for entry in session.get("active_injuries", []):
-        if entry.get("entry_id") == entry_id:
-            injury = INJURIES.get(entry.get("injury_id"))
-            if injury and entry.get("severity") in injury["severities"]:
-                return entry, injury
+        if entry.get("entry_id") != entry_id:
+            continue
+
+        injury = INJURIES.get(entry.get("injury_id"))
+        if injury and entry.get("severity") in injury["severities"]:
+            return entry, injury
+
     abort(404)
 
 
@@ -98,6 +109,7 @@ def build_entry_view(entry, injury):
     """Add calculated values used by injury cards and detail pages."""
     severity_data = injury["severities"][entry["severity"]]
     start_date = parse_start_date(entry.get("start_date"))
+
     if start_date is None:
         abort(404)
 
@@ -106,10 +118,8 @@ def build_entry_view(entry, injury):
     max_days = severity_data["max_days"]
     stage = get_stage(elapsed_days, max_days)
     remaining = remaining_range(elapsed_days, min_days, max_days)
-    progress = min(100, max(0, (elapsed_days / max_days) * 100))
-
-    # The earliest marker represents min_days; the latest is max_days.
-    earliest_marker = min(100, (min_days / max_days) * 100)
+    progress = min(100, max(0, elapsed_days / max_days * 100))
+    earliest_marker = min(100, min_days / max_days * 100)
 
     return {
         "entry": entry,
@@ -127,25 +137,169 @@ def build_entry_view(entry, injury):
 
 
 def safe_return_path(candidate, default_endpoint="home"):
-    """Only redirect to local paths supplied by the app."""
+    """Only redirect to a local path supplied by the app."""
     if candidate and candidate.startswith("/") and not candidate.startswith("//"):
         return candidate
+
     return url_for(default_endpoint)
+
+
+def simple_error_page(title, message, status_code):
+    """Render an error page without depending on base.html."""
+    page = """
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="theme-color" content="#f5f6f8">
+        <title>{{ title }} · HealTimer</title>
+        <style>
+          * { box-sizing: border-box; }
+          body {
+            margin: 0;
+            padding: 0 18px calc(90px + env(safe-area-inset-bottom));
+            background: #f5f6f8;
+            color: #18202b;
+            font: 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          }
+          header {
+            padding: calc(env(safe-area-inset-top) + 14px) 0 14px;
+            background: #fff;
+            border-bottom: 2px solid #e17a32;
+          }
+          .header-inner, main, nav > div {
+            width: min(100%, 620px);
+            margin: 0 auto;
+          }
+          .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+          }
+          .brand { color: #18202b; font-weight: 800; text-decoration: none; }
+          form.demo { display: flex; gap: 5px; flex-wrap: wrap; }
+          form.demo button {
+            min-height: 36px;
+            padding: 6px 9px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+            font: inherit;
+            font-size: 12px;
+          }
+          .badge {
+            width: fit-content;
+            margin: 10px auto 0;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #fff0e3;
+            font-size: 13px;
+            font-weight: 700;
+          }
+          main { padding-top: 15vh; }
+          section {
+            padding: 24px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 8px 28px rgba(31, 43, 60, .08);
+          }
+          a.home {
+            display: inline-flex;
+            min-height: 48px;
+            align-items: center;
+            margin-top: 10px;
+            padding: 12px 17px;
+            border-radius: 14px;
+            background: #e17a32;
+            color: #fff;
+            font-weight: 750;
+            text-decoration: none;
+          }
+          nav {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+            background: #fff;
+          }
+          nav > div { display: flex; justify-content: space-around; }
+          nav a { padding: 12px; color: #697386; text-decoration: none; }
+          @media (prefers-color-scheme: dark) {
+            body { background: #101216; color: #f3f5f8; }
+            header, section, nav, form.demo button { background: #1c2027; }
+            .brand { color: #f3f5f8; }
+            section { box-shadow: 0 8px 28px rgba(0, 0, 0, .22); }
+          }
+        </style>
+      </head>
+      <body>
+        <header>
+          <div class="header-inner">
+            <a class="brand" href="{{ url_for('home') }}">HealTimer</a>
+            <form class="demo" method="post" action="{{ url_for('set_demo_offset') }}">
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit" name="action" value="plus_one">+1 day</button>
+              <button type="submit" name="action" value="plus_seven">+7 days</button>
+              <button type="submit" name="action" value="plus_thirty">+30</button>
+              <button type="submit" name="action" value="reset">Reset</button>
+            </form>
+          </div>
+          {% set demo_offset = session.get('demo_offset_days', 0)|int %}
+          {% if demo_offset != 0 %}
+            <div class="badge">Demo mode: +{{ demo_offset }} days</div>
+          {% endif %}
+        </header>
+        <main>
+          <section>
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+            <a class="home" href="{{ url_for('home') }}">Go to Home</a>
+          </section>
+        </main>
+        <nav aria-label="Main navigation">
+          <div>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('catalogue') }}">Catalogue</a>
+            <a href="{{ url_for('notifications') }}">Notifications</a>
+          </div>
+        </nav>
+      </body>
+    </html>
+    """
+
+    return render_template_string(
+        page,
+        title=title,
+        message=message,
+    ), status_code
 
 
 @app.get("/")
 def home():
-    views = []
+    injury_views = []
+
     for entry in session.get("active_injuries", []):
         injury = INJURIES.get(entry.get("injury_id"))
         if not injury or entry.get("severity") not in injury["severities"]:
             continue
-        views.append(build_entry_view(entry, injury))
+        injury_views.append(build_entry_view(entry, injury))
 
-    header_stage = views[0]["stage"]["css_class"] if views else "stage-2"
+    header_stage = (
+        injury_views[0]["stage"]["css_class"]
+        if injury_views
+        else "stage-2"
+    )
+
     return render_template(
         "home.html",
-        injuries=views,
+        injuries=injury_views,
         active_tab="home",
         stage_class=header_stage,
     )
@@ -167,11 +321,13 @@ def category(category_id):
     if category_data is None:
         abort(404)
 
+    # Include each dictionary key as an id for the category template links.
     injuries = [
-        injury
-        for injury in INJURIES.values()
+        {"id": injury_id, **injury}
+        for injury_id, injury in INJURIES.items()
         if injury["category_id"] == category_id
     ]
+
     return render_template(
         "category.html",
         category=category_data,
@@ -189,9 +345,13 @@ def injury_start(injury_id):
 
     if request.method == "POST":
         severity = request.form.get("severity", "mild").lower()
+
         if severity not in injury["severities"]:
             severity = "mild"
-            flash("That severity was not recognized, so Mild was selected.", "error")
+            flash(
+                "That severity was not recognized, so Mild was selected.",
+                "error",
+            )
 
         active_injuries = session.get("active_injuries", [])
         if len(active_injuries) >= 8:
@@ -204,17 +364,24 @@ def injury_start(injury_id):
             "severity": severity,
             "start_date": get_today().isoformat(),
         }
+
         active_injuries.append(entry)
         session["active_injuries"] = active_injuries
+
         return redirect(url_for("detail", entry_id=entry["entry_id"]))
 
     selected_severity = request.args.get("severity", "mild").lower()
+
     if selected_severity not in injury["severities"]:
         selected_severity = "mild"
         if request.args.get("severity"):
-            flash("That severity was not recognized, so Mild is shown.", "error")
+            flash(
+                "That severity was not recognized, so Mild is shown.",
+                "error",
+            )
 
     preview = injury["severities"][selected_severity]
+
     return render_template(
         "injury_start.html",
         injury=injury,
@@ -245,17 +412,19 @@ def detail(entry_id):
     ]
 
     next_stage = None
+
     if view["stage"]["index"] < len(STAGES) - 1:
-        next_index = view["stage"]["index"] + 1
-        next_stage = dict(STAGES[next_index])
-        threshold_percent = [25, 50, 80][view["stage"]["index"]]
+        current_stage_index = view["stage"]["index"]
+        next_stage = dict(STAGES[current_stage_index + 1])
+        threshold_percent = [25, 50, 80][current_stage_index]
         next_stage_day = round(view["max_days"] * threshold_percent / 100)
         days_until = max(0, next_stage_day - view["elapsed_days"])
-        next_stage["days_until"] = days_until
-        next_stage["when"] = (
-            "about today" if days_until == 0
-            else f"in about {days_until} day" + ("" if days_until == 1 else "s")
-        )
+
+        if days_until == 0:
+            next_stage["when"] = "about today"
+        else:
+            unit = "day" if days_until == 1 else "days"
+            next_stage["when"] = f"in about {days_until} {unit}"
 
     return render_template(
         "detail.html",
@@ -271,11 +440,13 @@ def detail(entry_id):
 @app.post("/detail/<entry_id>/remove")
 def remove_injury(entry_id):
     get_entry(entry_id)
+
     session["active_injuries"] = [
         entry
         for entry in session.get("active_injuries", [])
         if entry.get("entry_id") != entry_id
     ]
+
     flash("Injury removed from your list.", "success")
     return redirect(url_for("home"))
 
@@ -295,22 +466,21 @@ def set_demo_offset():
         "plus_one": 1,
         "plus_seven": 7,
         "plus_thirty": 30,
-        "reset": None,
     }
     action = request.form.get("action")
 
-    if action in actions:
-        if action == "reset":
-            session["demo_offset_days"] = 0
-        else:
-            try:
-                current = int(session.get("demo_offset_days", 0))
-            except (TypeError, ValueError):
-                current = 0
-            session["demo_offset_days"] = max(
-                -36500,
-                min(36500, current + actions[action]),
-            )
+    if action == "reset":
+        session["demo_offset_days"] = 0
+    elif action in actions:
+        try:
+            current_offset = int(session.get("demo_offset_days", 0))
+        except (TypeError, ValueError):
+            current_offset = 0
+
+        session["demo_offset_days"] = max(
+            -36500,
+            min(36500, current_offset + actions[action]),
+        )
 
     return redirect(safe_return_path(request.form.get("next")))
 
@@ -323,44 +493,20 @@ def accept_disclaimer():
 
 @app.errorhandler(404)
 def not_found(_error):
-    page = """
-    {% extends "base.html" %}
-    {% block content %}
-      <section class="empty-state">
-        <p class="eyebrow">Page not found</p>
-        <h1>We couldn’t find that page.</h1>
-        <p>It may have moved, or the link may be out of date.</p>
-        <a class="button button-primary" href="{{ url_for('home') }}">Go to Home</a>
-      </section>
-    {% endblock %}
-    """
-    return render_template_string(
-        page,
-        active_tab="",
-        stage_class="stage-2",
-        title="Page not found",
-    ), 404
+    return simple_error_page(
+        "Page not found",
+        "That page may have moved, or the link may be out of date.",
+        404,
+    )
 
 
 @app.errorhandler(500)
 def server_error(_error):
-    page = """
-    {% extends "base.html" %}
-    {% block content %}
-      <section class="empty-state">
-        <p class="eyebrow">Something went wrong</p>
-        <h1>We couldn’t load this page.</h1>
-        <p>Please try again in a moment.</p>
-        <a class="button button-primary" href="{{ url_for('home') }}">Go to Home</a>
-      </section>
-    {% endblock %}
-    """
-    return render_template_string(
-        page,
-        active_tab="",
-        stage_class="stage-2",
-        title="Something went wrong",
-    ), 500
+    return simple_error_page(
+        "Something went wrong",
+        "We couldn’t load this page. Please try again in a moment.",
+        500,
+    )
 
 
 if __name__ == "__main__":
