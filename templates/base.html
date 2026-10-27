@@ -11,7 +11,7 @@
     :root {
       color-scheme: light dark;
       --page: #f5f6f8;
-      --surface: #ffffff;
+      --surface: #fff;
       --surface-muted: #eef0f4;
       --text: #18202b;
       --muted: #697386;
@@ -96,7 +96,9 @@
       cursor: pointer;
     }
 
-    .demo-panel button:active, .button:active, .category-link:active {
+    .demo-panel button:active,
+    .button:active,
+    .category-link:active {
       transform: scale(.98);
     }
 
@@ -132,11 +134,11 @@
     }
 
     h3 { font-size: 17px; }
-
     p { line-height: 1.5; }
 
     .subtitle, .muted, .eyebrow { color: var(--muted); }
     .subtitle { margin-bottom: 24px; }
+
     .eyebrow {
       margin-bottom: 8px;
       font-size: 12px;
@@ -171,6 +173,7 @@
     }
 
     .card-heading h2 { margin-bottom: 5px; }
+
     .severity {
       flex: 0 0 auto;
       padding: 6px 9px;
@@ -192,6 +195,7 @@
     }
 
     .progress-wrap { margin-top: 16px; }
+
     .progress-labels {
       display: flex;
       justify-content: space-between;
@@ -316,8 +320,8 @@
     .empty-state .button { margin-top: 10px; }
 
     .notice {
-      margin-bottom: 18px;
       padding: 16px;
+      margin-bottom: 18px;
       border: 1px solid var(--line);
       border-radius: 16px;
       background: var(--accent-soft);
@@ -327,6 +331,7 @@
     .notice h2 { margin-bottom: 8px; font-size: 18px; }
 
     .flash-list { margin-bottom: 16px; }
+
     .flash {
       padding: 12px 14px;
       margin-bottom: 8px;
@@ -334,6 +339,7 @@
       background: var(--surface);
       box-shadow: var(--shadow);
     }
+
     .flash-error { border-left: 4px solid var(--prohibited); }
     .flash-success { border-left: 4px solid var(--allowed); }
 
@@ -388,8 +394,8 @@
 
     .timeline {
       position: relative;
-      height: 18px;
       display: flex;
+      height: 18px;
       margin: 28px 0 12px;
       border-radius: 999px;
       background: var(--surface-muted);
@@ -427,154 +433,6 @@
     }
 
     .activity-table th, .activity-table td {
-      padding: 13px 4px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-    }
-
-    .activity-table th {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .activity-table td:last-child, .activity-table th:last-child {
-      text-align: right;
-    }
-
-    .status-chip {
-      display: inline-block;
-      padding: 6px 9px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .status-allowed { color: var(--allowed); background: var(--allowed-bg); }
-    .status-limited { color: var(--limited); background: var(--limited-bg); }
-    .status-prohibited { color: var(--prohibited); background: var(--prohibited-bg); }
-
-    .passed-notice {
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--limited-bg);
-      color: var(--limited);
-      font-weight: 650;
-    }
-
-    .disclaimer-footer {
-      padding: 18px 4px 0;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      z-index: 10;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
-      background: var(--surface);
-      box-shadow: var(--nav-shadow);
-    }
-
-    .bottom-nav-inner {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    .nav-item {
-      display: flex;
-      min-height: 52px;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      border-radius: 13px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .nav-item.active {
-      background: var(--accent-soft, #fff0e3);
-      color: var(--accent, #e17a32);
-    }
-
-    .nav-symbol { font-size: 18px; line-height: 1; }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --page: #101216;
-        --surface: #1c2027;
-        --surface-muted: #292e37;
-        --text: #f3f5f8;
-        --muted: #a4adbc;
-        --line: rgba(235, 240, 250, .11);
-        --shadow: 0 8px 28px rgba(0, 0, 0, .22);
-        --nav-shadow: 0 -5px 24px rgba(0, 0, 0, .28);
-        --allowed: #62ce91;
-        --allowed-bg: #183c2b;
-        --limited: #f1b64d;
-        --limited-bg: #493719;
-        --prohibited: #ff8585;
-        --prohibited-bg: #482727;
-      }
-
-      .stage-1 { --accent: #f07171; --accent-soft: #482727; }
-      .stage-2 { --accent: #f09a5b; --accent-soft: #49301f; }
-      .stage-3 { --accent: #e4c458; --accent-soft: #453b1d; }
-      .stage-4 { --accent: #5fc68d; --accent-soft: #183c2b; }
-    }
-
-    @media (max-width: 380px) {
-      .app-header { padding-right: 14px; padding-left: 14px; }
-      .demo-label { display: none; }
-      .demo-panel button { padding-right: 7px; padding-left: 7px; }
-      main { padding-right: 14px; padding-left: 14px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        scroll-behavior: auto !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <header class="app-header {{ stage_class|default('stage-2') }}">
-    <div class="header-inner">
-      <div class="topline">
-        <a class="brand" href="{{ url_for('home') }}">HealTimer</a>
-        <form class="demo-panel" method="post" action="{{ url_for('set_demo_offset') }}">
-          <span class="demo-label">Demo</span>
-          <input type="hidden" name="next" value="{{ request.path }}">
-          <button type="submit" name="action" value="plus_one" aria-label="Advance demo by one day">+1 day</button>
-          <button type="submit" name="action" value="plus_seven" aria-label="Advance demo by seven days">+7 days</button>
-          <button type="submit" name="action" value="plus_thirty" aria-label="Advance demo by thirty days">+30</button>
-          <button type="submit" name="action" value="reset">Reset</button>
-        </form>
-      </div>
-
-      {% set demo_offset = session.get('demo_offset_days', 0)|int %}
-      {% if demo_offset != 0 %}
-        <div class="demo-badge" role="status">Demo mode: +{{ demo_offset }} days</div>
-      {% endif %}
-    </div>
-  </header>
-
-  <main class="{{ stage_class|default('stage-2') }}">
-    {% if not session.get('disclaimer_accepted', False) %}
-      <section class="notice" aria-label="Important notice">
-        <h2>A note before you begin</h2>
-        <p>Healing times and activity suggestions are estimates only. This app is not medical advice and cannot replace a clinician’s guidance.</p>
-        <form method="post" action="{{ url_for('accept_disclaimer') }}">
-          <input type="hidden" name="next" value="{{ request.path }}"> **…**
+      padding: 13px 4px; **…**
 
 _This response is too long to display in full._
