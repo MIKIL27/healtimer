@@ -1,1 +1,253 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f3f6f4">
+  <title>{% block title %}HealTimer{% endblock %}</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f6f4;
+      --surface: #ffffff;
+      --surface-soft: #eaf1ed;
+      --text: #1d2925;
+      --muted: #68766f;
+      --line: #e1e8e3;
+      --brand: #26775a;
+      --brand-soft: #e0f1e8;
+      --stage-1: #e45b63;
+      --stage-2: #e4a336;
+      --stage-3: #43a879;
+      --allowed-bg: #dff3e8;
+      --allowed-text: #176b44;
+      --limited-bg: #fff0cf;
+      --limited-text: #895800;
+      --prohibited-bg: #fde1e2;
+      --prohibited-text: #a22d35;
+      --shadow: 0 8px 24px rgba(35, 64, 49, .07);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 0 calc(92px + env(safe-area-inset-bottom));
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, a, input { font: inherit; }
+    .topbar {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 14px 20px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { color: var(--brand); font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
+    .demo-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .demo-tools form { margin: 0; }
+    .demo-button {
+      min-height: 44px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .demo-badge {
+      padding: 6px 9px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+    main { max-width: 720px; margin: 0 auto; padding: 14px 20px 26px; }
+    h1 { margin: 4px 0 8px; font-size: clamp(30px, 8vw, 40px); line-height: 1.08; letter-spacing: -.055em; }
+    h2 { margin: 0; font-size: 19px; letter-spacing: -.03em; }
+    h3 { margin: 0 0 7px; font-size: 14px; color: var(--muted); }
+    p { line-height: 1.5; }
+    .eyebrow { margin: 0 0 7px; color: var(--brand); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+    .subtitle { margin: 0 0 22px; color: var(--muted); }
+    .card {
+      padding: 18px;
+      margin: 12px 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+    .info-card p { margin: 0; }
+    .section-heading { margin: 24px 0 10px; }
+    .category-card { padding: 17px; }
+    .category-card h2 { margin-bottom: 12px; }
+    .case-links { display: grid; gap: 8px; }
+    .case-link, .injury-card { display: block; }
+    .case-link {
+      min-height: 48px;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--bg);
+      font-weight: 700;
+    }
+    .injury-card { transition: transform .15s ease, box-shadow .15s ease; }
+    .injury-card:active, .case-link:active, .button:active { transform: scale(.985); }
+    .injury-card-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .injury-card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .arrow { color: var(--brand); font-size: 22px; font-weight: 700; line-height: 1; }
+    .home-progress-track { height: 8px; margin-top: 15px; overflow: hidden; border-radius: 999px; background: var(--surface-soft); }
+    .home-progress-fill { height: 100%; border-radius: inherit; }
+    .home-progress-fill.stage-1 { background: var(--stage-1); }
+    .home-progress-fill.stage-2 { background: var(--stage-2); }
+    .home-progress-fill.stage-3 { background: var(--stage-3); }
+    .button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    .button-secondary { color: var(--text); background: var(--surface-soft); }
+    .button-danger { background: #b8424a; }
+    .button-form { margin-top: 20px; }
+    .healing-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .healing-value { color: var(--brand); font-size: 23px; font-weight: 850; letter-spacing: -.04em; text-align: right; }
+    .pain-dots { display: flex; gap: 6px; margin: 2px 0 10px; }
+    .pain-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+    .pain-dot.filled { background: var(--stage-2); }
+    .warning-card { border-color: #f1c8a6; background: #fff8ef; }
+    .warning-card h3 { color: #9b4b14; }
+    .warning-card p { margin: 0; }
+    .countdown-card { color: #fff; background: var(--brand); border: 0; }
+    .countdown-card.stage-1 { background: var(--stage-1); }
+    .countdown-card.stage-2 { background: var(--stage-2); color: #332400; }
+    .countdown-card.stage-3 { background: var(--stage-3); }
+    .countdown-label { margin: 0 0 4px; opacity: .88; font-size: 13px; font-weight: 700; }
+    .countdown-number { margin: 0; font-size: clamp(30px, 8vw, 42px); line-height: 1; font-weight: 850; letter-spacing: -.06em; }
+    .countdown-meta { margin: 12px 0 0; font-size: 14px; opacity: .92; }
+    .timeline { position: relative; display: flex; height: 13px; margin: 18px 5px 8px; border-radius: 999px; background: var(--line); }
+    .timeline-segment { height: 100%; }
+    .timeline-segment:first-child { width: 33%; border-radius: 999px 0 0 999px; background: var(--stage-1); }
+    .timeline-segment:nth-child(2) { width: 33%; background: var(--stage-2); }
+    .timeline-segment:nth-child(3) { width: 34%; border-radius: 0 999px 999px 0; background: var(--stage-3); }
+    .today-marker { position: absolute; top: -5px; width: 4px; height: 23px; background: var(--text); border: 1px solid var(--surface); border-radius: 4px; transform: translateX(-50%); }
+    .timeline-legend { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
+    .stage-heading { display: flex; align-items: center; gap: 9px; }
+    .stage-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--stage-1); }
+    .stage-dot.stage-2 { background: var(--stage-2); }
+    .stage-dot.stage-3 { background: var(--stage-3); }
+    .activity-table { width: 100%; border-collapse: collapse; }
+    .activity-table th, .activity-table td { padding: 12px 4px; border-bottom: 1px solid var(--line); text-align: left; }
+    .activity-table th { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .activity-table td { font-size: 14px; }
+    .activity-table tr:last-child td { border-bottom: 0; }
+    .status-chip { display: inline-flex; padding: 6px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .status-allowed { background: var(--allowed-bg); color: var(--allowed-text); }
+    .status-limited { background: var(--limited-bg); color: var(--limited-text); }
+    .status-prohibited { background: var(--prohibited-bg); color: var(--prohibited-text); }
+    .passed-note { padding: 13px 14px; border-radius: 13px; background: var(--limited-bg); color: var(--limited-text); font-size: 14px; line-height: 1.45; }
+    .empty-state { text-align: center; padding: 32px 20px; }
+    .empty-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 20px; background: var(--brand-soft); color: var(--brand); font-size: 27px; font-weight: 800; }
+    .empty-state p { margin: 7px 0 20px; color: var(--muted); }
+    .footer { max-width: 720px; margin: 0 auto; padding: 0 20px 18px; color: var(--muted); text-align: center; font-size: 12px; }
+    .tabbar {
+      position: fixed;
+      z-index: 5;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 10px 20px calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: 0 -8px 22px rgba(35, 64, 49, .06);
+    }
+    .tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .tab.active { background: var(--brand-soft); color: var(--brand); }
+    .tab-icon { font-size: 17px; }
+    .stage-accent { height: 5px; margin: -4px -20px 18px; background: var(--brand); }
+    .stage-accent.stage-1 { background: var(--stage-1); }
+    .stage-accent.stage-2 { background: var(--stage-2); }
+    .stage-accent.stage-3 { background: var(--stage-3); }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111a16;
+        --surface: #1c2822;
+        --surface-soft: #26382e;
+        --text: #edf4ef;
+        --muted: #a1b2a8;
+        --line: #33443b;
+        --brand: #71c99e;
+        --brand-soft: #233d30;
+        --allowed-bg: #1c4731;
+        --allowed-text: #a4e2bd;
+        --limited-bg: #4b3a1d;
+        --limited-text: #f4d38c;
+        --prohibited-bg: #4d282c;
+        --prohibited-text: #f2a5aa;
+        --shadow: 0 8px 24px rgba(0, 0, 0, .15);
+      }
+      .warning-card { border-color: #68452d; background: #35291f; }
+      .warning-card h3 { color: #ffc48e; }
+      .countdown-card.stage-2 { color: #302300; }
+      .button { color: #0e281b; }
+      .button-danger { color: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('home') }}">HealTimer</a>
+    <div class="demo-tools" aria-label="Demo controls">
+      {% if demo_offset %}
+        <span class="demo-badge">Demo: +{{ demo_offset }} days</span>
+      {% endif %}
+      <form method="post" action="{{ url_for('demo', action='plus1') }}"><button class="demo-button" type="submit">+1 day</button></form>
+      <form method="post" action="{{ url_for('demo', action='plus7') }}"><button class="demo-button" type="submit">+7 days</button></form>
+      <form method="post" action="{{ url_for('demo', action='reset') }}"><button class="demo-button" type="submit">Reset</button></form>
+    </div>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">Estimates only. Not medical advice. Consult a doctor.</footer>
+  <nav class="tabbar" aria-label="Main navigation">
+    <a class="tab {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}"><span class="tab-icon" aria-hidden="true">⌂</span>Home</a>
+    <a class="tab {% if request.endpoint == 'catalogue' %}active{% endif %}" href="{{ url_for('catalogue') }}"><span class="tab-icon" aria-hidden="true">＋</span>Catalogue</a>
+  </nav>
+</body>
+</html>
