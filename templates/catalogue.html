@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Catalogue · HealTimer{% endblock %}
+{% block content %}
+  <p class="eyebrow">Injury catalogue</p>
+  <h1>Catalogue</h1>
+  <p class="subtitle">Choose an injury to view its recovery information.</p>
+
+  {% for group in groups %}
+    <section class="card category-card">
+      <h2>{{ group.category.name }}</h2>
+      <div class="case-links">
+        {% for case_id, case in group.cases %}
+          <a class="case-link" href="{{ url_for('case_page', case_id=case_id) }}">{{ case.name }}</a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+{% endblock %}
