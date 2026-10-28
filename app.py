@@ -62,7 +62,7 @@ def safe_previous_page():
     referrer = request.referrer
     if referrer:
         parsed = urlparse(referrer)
-        if not parsed.netloc and (
+        if parsed.netloc == request.host and (
             parsed.path == url_for("home")
             or parsed.path == url_for("catalogue")
             or parsed.path.startswith("/case/")
