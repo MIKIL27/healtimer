@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from flask import Flask, abort, redirect, render_template, request, session, url_for
 
-from data import CASES, CATEGORIES, STATUS_NAMES
+from data import CASES, CATEGORIES, SEVERITY, STATUS_NAMES
 
 app = Flask(__name__, static_folder=None)
 # Change this placeholder to a long, random secret before publishing.
@@ -19,6 +19,11 @@ STAGES = [
     {"name": "Careful recovery", "number": 2, "class": "stage-2", "color": "#e4a336"},
     {"name": "Almost healed", "number": 3, "class": "stage-3", "color": "#43a879"},
 ]
+
+
+@app.context_processor
+def inject_severity():
+    return {"SEVERITY": SEVERITY}
 
 
 def get_today():
@@ -71,7 +76,7 @@ def home():
     cards = []
     for case_id, start_text in get_started_cases().items():
         case = CASES.get(case_id)
-        if not case:
+        if not case or case.get("no_countdown"):
             continue
         try:
             started = date.fromisoformat(start_text)
@@ -133,7 +138,7 @@ def case_page(case_id):
             started = None
 
     details = None
-    if started:
+    if started and not case.get("no_countdown"):
         elapsed = max(0, (get_today() - started).days)
         low, high = remaining_range(case, elapsed)
         stage = get_stage(elapsed, case["max_days"])
@@ -167,7 +172,8 @@ def case_page(case_id):
 
 @app.post("/case/<case_id>/start")
 def start_case(case_id):
-    if case_id not in CASES:
+    case = CASES.get(case_id)
+    if not case or case.get("no_countdown"):
         abort(404)
     started = get_started_cases().copy()
     started[case_id] = get_today().isoformat()
