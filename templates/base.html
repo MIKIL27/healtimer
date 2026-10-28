@@ -21,6 +21,11 @@
       --stage-1: #e45b63;
       --stage-2: #e4a336;
       --stage-3: #43a879;
+      --neon-mild: #12a150;
+      --neon-moderate: #d9a400;
+      --neon-severe: #f06a00;
+      --neon-emergency: #e0203f;
+      --neon-maximum: #9a2fe0;
       --allowed-bg: #dff3e8;
       --allowed-text: #176b44;
       --limited-bg: #fff0cf;
@@ -97,157 +102,45 @@
     .case-links { display: grid; gap: 8px; }
     .case-link, .injury-card { display: block; }
     .case-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       min-height: 48px;
       padding: 13px 14px;
-      border: 1px solid var(--line);
       border-radius: 13px;
       background: var(--bg);
       font-weight: 700;
     }
-    .injury-card { transition: transform .15s ease, box-shadow .15s ease; }
-    .injury-card:active, .case-link:active, .button:active { transform: scale(.985); }
-    .injury-card-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
-    .injury-card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
-    .arrow { color: var(--brand); font-size: 22px; font-weight: 700; line-height: 1; }
-    .home-progress-track { height: 8px; margin-top: 15px; overflow: hidden; border-radius: 999px; background: var(--surface-soft); }
-    .home-progress-fill { height: 100%; border-radius: inherit; }
-    .home-progress-fill.stage-1 { background: var(--stage-1); }
-    .home-progress-fill.stage-2 { background: var(--stage-2); }
-    .home-progress-fill.stage-3 { background: var(--stage-3); }
-    .button {
-      display: flex;
-      justify-content: center;
+    .case-link > .case-name { flex: 1 1 auto; min-width: 0; }
+    .severity-label { flex-shrink: 0; color: var(--muted); font-size: 12px; font-weight: 600; }
+    .severity-legend { margin: 16px 0 22px; }
+    .severity-legend-pills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .severity-legend-pill {
+      display: inline-flex;
       align-items: center;
-      width: 100%;
-      min-height: 52px;
-      padding: 12px 18px;
-      border: 0;
-      border-radius: 15px;
-      background: var(--brand);
-      color: #fff;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform .15s ease, opacity .15s ease;
-    }
-    .button-secondary { color: var(--text); background: var(--surface-soft); }
-    .button-danger { background: #b8424a; }
-    .button-form { margin-top: 20px; }
-    .healing-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
-    .healing-value { color: var(--brand); font-size: 23px; font-weight: 850; letter-spacing: -.04em; text-align: right; }
-    .pain-dots { display: flex; gap: 6px; margin: 2px 0 10px; }
-    .pain-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
-    .pain-dot.filled { background: var(--stage-2); }
-    .warning-card { border-color: #f1c8a6; background: #fff8ef; }
-    .warning-card h3 { color: #9b4b14; }
-    .warning-card p { margin: 0; }
-    .countdown-card { color: #fff; background: var(--brand); border: 0; }
-    .countdown-card.stage-1 { background: var(--stage-1); }
-    .countdown-card.stage-2 { background: var(--stage-2); color: #332400; }
-    .countdown-card.stage-3 { background: var(--stage-3); }
-    .countdown-label { margin: 0 0 4px; opacity: .88; font-size: 13px; font-weight: 700; }
-    .countdown-number { margin: 0; font-size: clamp(30px, 8vw, 42px); line-height: 1; font-weight: 850; letter-spacing: -.06em; }
-    .countdown-meta { margin: 12px 0 0; font-size: 14px; opacity: .92; }
-    .timeline { position: relative; display: flex; height: 13px; margin: 18px 5px 8px; border-radius: 999px; background: var(--line); }
-    .timeline-segment { height: 100%; }
-    .timeline-segment:first-child { width: 33%; border-radius: 999px 0 0 999px; background: var(--stage-1); }
-    .timeline-segment:nth-child(2) { width: 33%; background: var(--stage-2); }
-    .timeline-segment:nth-child(3) { width: 34%; border-radius: 0 999px 999px 0; background: var(--stage-3); }
-    .today-marker { position: absolute; top: -5px; width: 4px; height: 23px; background: var(--text); border: 1px solid var(--surface); border-radius: 4px; transform: translateX(-50%); }
-    .timeline-legend { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
-    .stage-heading { display: flex; align-items: center; gap: 9px; }
-    .stage-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--stage-1); }
-    .stage-dot.stage-2 { background: var(--stage-2); }
-    .stage-dot.stage-3 { background: var(--stage-3); }
-    .activity-table { width: 100%; border-collapse: collapse; }
-    .activity-table th, .activity-table td { padding: 12px 4px; border-bottom: 1px solid var(--line); text-align: left; }
-    .activity-table th { color: var(--muted); font-size: 12px; font-weight: 700; }
-    .activity-table td { font-size: 14px; }
-    .activity-table tr:last-child td { border-bottom: 0; }
-    .status-chip { display: inline-flex; padding: 6px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
-    .status-allowed { background: var(--allowed-bg); color: var(--allowed-text); }
-    .status-limited { background: var(--limited-bg); color: var(--limited-text); }
-    .status-prohibited { background: var(--prohibited-bg); color: var(--prohibited-text); }
-    .passed-note { padding: 13px 14px; border-radius: 13px; background: var(--limited-bg); color: var(--limited-text); font-size: 14px; line-height: 1.45; }
-    .empty-state { text-align: center; padding: 32px 20px; }
-    .empty-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 20px; background: var(--brand-soft); color: var(--brand); font-size: 27px; font-weight: 800; }
-    .empty-state p { margin: 7px 0 20px; color: var(--muted); }
-    .footer { max-width: 720px; margin: 0 auto; padding: 0 20px 18px; color: var(--muted); text-align: center; font-size: 12px; }
-    .tabbar {
-      position: fixed;
-      z-index: 5;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 10px 20px calc(10px + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--line);
+      min-height: 30px;
+      padding: 4px 10px;
+      border-radius: 999px;
       background: var(--surface);
-      box-shadow: 0 -8px 22px rgba(35, 64, 49, .06);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
     }
-    .tab {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 48px;
-      border-radius: 14px;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 750;
+    .severity-legend-note { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .severity-legend-pill,
+    .severity-badge {
+      --neon: #8a948f;
+      border: 2px solid var(--neon);
+      box-shadow: 0 0 6px var(--neon), inset 0 0 3px var(--neon);
     }
-    .tab.active { background: var(--brand-soft); color: var(--brand); }
-    .tab-icon { font-size: 17px; }
-    .stage-accent { height: 5px; margin: -4px -20px 18px; background: var(--brand); }
-    .stage-accent.stage-1 { background: var(--stage-1); }
-    .stage-accent.stage-2 { background: var(--stage-2); }
-    .stage-accent.stage-3 { background: var(--stage-3); }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111a16;
-        --surface: #1c2822;
-        --surface-soft: #26382e;
-        --text: #edf4ef;
-        --muted: #a1b2a8;
-        --line: #33443b;
-        --brand: #71c99e;
-        --brand-soft: #233d30;
-        --allowed-bg: #1c4731;
-        --allowed-text: #a4e2bd;
-        --limited-bg: #4b3a1d;
-        --limited-text: #f4d38c;
-        --prohibited-bg: #4d282c;
-        --prohibited-text: #f2a5aa;
-        --shadow: 0 8px 24px rgba(0, 0, 0, .15);
-      }
-      .warning-card { border-color: #68452d; background: #35291f; }
-      .warning-card h3 { color: #ffc48e; }
-      .countdown-card.stage-2 { color: #302300; }
-      .button { color: #0e281b; }
-      .button-danger { color: #fff; }
-    }
-  </style>
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="{{ url_for('home') }}">HealTimer</a>
-    <div class="demo-tools" aria-label="Demo controls">
-      {% if demo_offset %}
-        <span class="demo-badge">Demo: +{{ demo_offset }} days</span>
-      {% endif %}
-      <form method="post" action="{{ url_for('demo', action='plus1') }}"><button class="demo-button" type="submit">+1 day</button></form>
-      <form method="post" action="{{ url_for('demo', action='plus7') }}"><button class="demo-button" type="submit">+7 days</button></form>
-      <form method="post" action="{{ url_for('demo', action='reset') }}"><button class="demo-button" type="submit">Reset</button></form>
-    </div>
-  </header>
-  <main>
-    {% block content %}{% endblock %}
-  </main>
-  <footer class="footer">Estimates only. Not medical advice. Consult a doctor.</footer>
-  <nav class="tabbar" aria-label="Main navigation">
-    <a class="tab {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}"><span class="tab-icon" aria-hidden="true">⌂</span>Home</a>
-    <a class="tab {% if request.endpoint == 'catalogue' %}active{% endif %}" href="{{ url_for('catalogue') }}"><span class="tab-icon" aria-hidden="true">＋</span>Catalogue</a>
-  </nav>
-</body>
-</html>
+    .severity-legend-pill.sev-mild, .severity-badge.sev-mild { --neon: #12a150; }
+    .severity-legend-pill.sev-moderate, .severity-badge.sev-moderate { --neon: #d9a400; }
+    .severity-legend-pill.sev-severe, .severity-badge.sev-severe { --neon: #f06a00; }
+    .severity-legend-pill.sev-emergency, .severity-badge.sev-emergency { --neon: #e0203f; }
+    .severity-legend-pill.sev-maximum, .severity-badge.sev-maximum { --neon: #9a2fe0; }
+    .case-links a.case-link.sev-mild { --neon: #12a150; }
+    .case-links a.case-link.sev-moderate { --neon: #d9a400; }
+    .case-links a.case-link.sev-se **…**
+
+_This response is too long to display in full._
