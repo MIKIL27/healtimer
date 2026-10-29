@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Not found · HealTimer{% endblock %}
+{% block content %}
+  <p class="eyebrow">Page not found</p>
+  <h1>We couldn’t find that injury.</h1>
+  <p class="subtitle">It may have been removed or the link may be incorrect.</p>
+  <a class="button" href="{{ url_for('catalogue') }}">Open catalogue</a>
+{% endblock %}

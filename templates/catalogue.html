@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Catalogue · HealTimer{% endblock %}
+{% block content %}
+  <p class="eyebrow">Injury catalogue</p>
+  <h1>Catalogue</h1>
+  <p class="subtitle">Choose an injury to view its recovery information.</p>
+
+  <section class="severity-legend" aria-label="Severity colours">
+    <div class="severity-legend-pills">
+      {% for key, label in SEVERITY.items() %}
+        <span class="severity-legend-pill sev-{{ key }}">{{ label }}</span>
+      {% endfor %}
+    </div>
+    <p class="severity-legend-note">Severity is a rough guide, not a diagnosis.</p>
+  </section>
+
+  {% for group in groups %}
+    <section class="card category-card">
+      <h2>{{ group.category.name }}</h2>
+      <div class="case-links">
+        {% for case_id, case in group.cases %}
+          <a class="case-link sev-{{ case.severity }}" href="{{ url_for('case_page', case_id=case_id) }}">
+            <span class="case-name">{{ case.name }}</span>
+            <span class="severity-label">{{ SEVERITY[case.severity] }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+{% endblock %}
