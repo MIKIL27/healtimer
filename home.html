@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Home · HealTimer{% endblock %}
+{% block content %}
+  <p class="eyebrow">Recovery overview</p>
+  <h1>Your recovery</h1>
+  <p class="subtitle">Track an estimate while you heal.</p>
+
+  {% if cards %}
+    {% for item in cards %}
+      <a class="card injury-card" href="{{ url_for('case_page', case_id=item.id) }}">
+        <div class="injury-card-top">
+          <div>
+            <h2>{{ item.case.name }}</h2>
+            <p>{{ item.elapsed }} days elapsed · {{ item.low }}-{{ item.high }} days left</p>
+          </div>
+          <span class="arrow" aria-hidden="true">›</span>
+        </div>
+        <div class="home-progress-track" role="img" aria-label="{{ item.progress|round|int }} percent of the healing estimate elapsed">
+          <div class="home-progress-fill {{ item.stage.class }}" style="width: {{ item.progress }}%"></div>
+        </div>
+      </a>
+    {% endfor %}
+    <a class="button button-secondary" href="{{ url_for('catalogue') }}">Browse injury catalogue</a>
+  {% else %}
+    <section class="card empty-state">
+      <div class="empty-icon" aria-hidden="true">＋</div>
+      <h2>No active injuries</h2>
+      <p>Choose an injury to read its information and start a countdown.</p>
+      <a class="button" href="{{ url_for('catalogue') }}">Browse catalogue</a>
+    </section>
+  {% endif %}
+{% endblock %}

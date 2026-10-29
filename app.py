@@ -212,9 +212,13 @@ def page_not_found(_error):
 
 @app.errorhandler(500)
 def server_error(_error):
-    return render_template("500.html", demo_offset=session.get("demo_offset", 0)), 500
+    try:
+        return render_template("500.html", demo_offset=session.get("demo_offset", 0)), 500
+    except Exception:
+        # If the templates themselves are broken or missing, show plain text
+        # instead of a blank page. The real error is still in the server log.
+        return "HealTimer could not load this page. Please try again in a moment.", 500
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
-    
